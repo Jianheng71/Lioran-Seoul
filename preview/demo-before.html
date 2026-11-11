@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taskly - 让团队的事情有着落</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 0; }
+.top { padding: 13px 18px; border-bottom: 1px solid #ccc; }
+.top a { color: blue; text-decoration: underline; margin-right: 13px; }
+.hero { padding: 18px; background: #fff; }
+.card { border: 1px solid #999; padding: 7px; margin: 9px 0; }
+.card2 { border: 2px solid #333; padding: 13px; margin: 9px 0; border-radius: 3px; }
+.bigbtn { background: blue; color: white; padding: 6px 9px; }
+input { padding: 5px; }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <b>✅ Taskly</b>
+  <a href="#features">功能</a>
+  <a href="#numbers">数据</a>
+  <a href="#try">免费试用</a>
+</div>
+
+<div class="hero">
+  <h1 style="font-size:22px">让团队的事情有着落</h1>
+  <p style="font-size:15px">Taskly 是一个简单的团队协作工具，帮你把任务、进度和讨论放在一个地方。现在就开始免费使用吧。</p>
+  <button class="bigbtn" onclick="scrollToTry()">🚀 立即开始</button>
+  <button onclick="scrollToTry()">了解更多</button>
+</div>
+
+<div id="features" style="padding:18px">
+  <h2 style="font-size:17px">⭐ 主要功能</h2>
+  <div class="card">
+    <h3 style="font-size:15px">📋 任务看板</h3>
+    <p>把所有任务放进看板，谁在做、做到哪一步，一眼看清。</p>
+  </div>
+  <div class="card2">
+    <h3 style="font-size:15px">💬 实时讨论</h3>
+    <p>在任务下面直接讨论，不用再来回翻聊天记录。</p>
+  </div>
+  <div class="card">
+    <h3 style="font-size:15px">📈 进度报告</h3>
+    <p>每周自动生成进度报告，省掉手动整理的时间。</p>
+  </div>
+</div>
+
+<div id="numbers" style="padding:18px;background:#f0f0f0">
+  <h2 style="font-size:17px">📊 大家在用</h2>
+  <p>12000 个团队 · 480000 个任务 · 99 个国家</p>
+  <p>Acme · Globex · Initech · Umbrella · Soylent · Hooli</p>
+</div>
+
+<div id="try" style="padding:18px">
+  <h2 style="font-size:17px">✏️ 免费试用</h2>
+  <p>留下邮箱，我们会把试用链接发给你。</p>
+  <input id="email" type="email" placeholder="you@company.com" style="width:260px">
+  <button class="bigbtn" onclick="subscribe()">提交</button>
+  <p id="subscribeMsg" style="color:green"></p>
+
+  <h3 style="font-size:15px;margin-top:25px">🔖 顺便试试我们的待办清单</h3>
+  <input id="todoInput" placeholder="添加一个任务" style="width:260px">
+  <button onclick="addTodo()">添加</button>
+  <ul id="todoList"></ul>
+</div>
+
+<div style="padding:13px;border-top:1px solid #ccc;font-size:12px">
+  © 2026 Taskly. 保留所有权利。 <a href="#try">联系我们</a>
+</div>
+
+<script>
+function scrollToTry() { document.getElementById('try').scrollIntoView({ behavior: 'smooth' }); }
+function subscribe() {
+  var v = document.getElementById('email').value;
+  document.getElementById('subscribeMsg').textContent =
+    v.indexOf('@') > 0 ? '已提交：' + v : '请输入有效邮箱';
+}
+function addTodo() {
+  var input = document.getElementById('todoInput');
+  if (!input.value.trim()) return;
+  var li = document.createElement('li');
+  li.textContent = input.value;
+  li.onclick = function () { this.remove(); };
+  document.getElementById('todoList').appendChild(li);
+  input.value = '';
+}
+</script>
+</body>
+</html>

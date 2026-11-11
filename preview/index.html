@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lioran-Seoul · AI 美化师工作台</title>
+<style>
+:root{
+  --bg:#ffffff;--bg-subtle:#fafafa;--bg-muted:#f4f4f5;--surface:#ffffff;
+  --text:#18181b;--text-secondary:#52525b;--text-tertiary:#71717a;
+  --border:#e4e4e7;--border-strong:#d4d4d8;
+  --accent:#4f46e5;--accent-hover:#4338ca;--accent-soft:#eef2ff;
+  --radius-sm:8px;--radius-md:12px;--radius-lg:16px;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.04);--shadow-md:0 8px 24px rgba(0,0,0,.08);
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg-subtle);color:var(--text);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.icon{width:16px;height:16px;stroke:currentColor;stroke-width:1.75;fill:none;
+  stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+.topbar{display:flex;align-items:center;gap:16px;height:60px;padding:0 24px;
+  background:var(--surface);border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;letter-spacing:-.02em}
+.brand-mark{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;
+  background:var(--accent);color:#fff}
+.brand-mark .icon{width:16px;height:16px;stroke-width:2.2}
+.brand-sub{font-size:12px;font-weight:400;color:var(--text-tertiary);margin-left:2px}
+.topbar-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;
+  border:1px solid var(--border);background:var(--bg-subtle);font-size:12px;color:var(--text-secondary)}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:var(--success,#16a34a)}
+.topbar a{font-size:13px;color:var(--text-secondary);display:inline-flex;align-items:center;gap:6px}
+.topbar a:hover{color:var(--accent)}
+
+.layout{display:grid;grid-template-columns:380px 1fr;gap:16px;padding:16px;height:calc(100vh - 60px)}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
+  box-shadow:var(--shadow-sm);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.panel-head{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--border);
+  font-size:13px;font-weight:500}
+.panel-body{padding:16px;overflow:auto;flex:1}
+
+.section-label{display:block;margin:0 0 8px;font-size:12px;font-weight:500;color:var(--text-tertiary);
+  letter-spacing:.04em;text-transform:uppercase}
+.field{margin-bottom:16px}
+textarea,select,input[type=text]{width:100%;padding:10px 12px;font:inherit;font-size:13px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;
+  transition:border-color .15s ease-out,box-shadow .15s ease-out}
+textarea:focus,select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+textarea{height:200px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:12px;line-height:1.55}
+select{height:38px;cursor:pointer}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;
+  padding:9px 14px;border:1px solid transparent;border-radius:var(--radius-sm);
+  font:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s ease-out}
+.btn-primary{background:var(--accent);color:#fff;width:100%}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed}
+.btn-ghost{background:var(--surface);color:var(--text);border-color:var(--border)}
+.btn-ghost:hover{background:var(--bg-muted);border-color:var(--border-strong)}
+.btn-row{display:flex;gap:8px;margin-bottom:16px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.status{margin:14px 0 0;padding:10px 12px;border-radius:var(--radius-sm);
+  background:var(--bg-subtle);border:1px solid var(--border);font-size:12px;color:var(--text-secondary)}
+.status.ok{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
+.status.err{background:#fef2f2;border-color:#fecaca;color:#991b1b}
+.result-block{margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+.result-block h3{margin:0 0 10px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px}
+.tag{display:inline-block;padding:2px 7px;margin:0 6px 6px 0;border-radius:6px;
+  background:var(--bg-muted);border:1px solid var(--border);font-size:11px;color:var(--text-secondary)}
+.change{padding:8px 10px;margin-bottom:6px;border:1px solid var(--border);border-radius:var(--radius-sm);
+  font-size:12px;background:var(--bg-subtle)}
+.change b{font-weight:500;color:var(--accent)}
+.change small{display:block;color:var(--text-tertiary);margin-top:2px}
+.integrity{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius-sm);
+  background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;font-size:12px}
+
+.preview-panel{display:flex;flex-direction:column}
+.preview-toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border)}
+.segmented{display:inline-flex;padding:3px;background:var(--bg-muted);border-radius:var(--radius-sm)}
+.segmented button{padding:5px 12px;border:0;background:transparent;border-radius:6px;
+  font:inherit;font-size:12px;color:var(--text-secondary);cursor:pointer;transition:all .15s ease-out}
+.segmented button.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm)}
+.preview-meta{margin-left:auto;font-size:12px;color:var(--text-tertiary);display:flex;align-items:center;gap:8px}
+.frames{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);flex:1;min-height:0}
+.frames.single{grid-template-columns:1fr}
+.frame-wrap{display:flex;flex-direction:column;background:var(--surface);min-width:0}
+.frame-label{display:flex;align-items:center;gap:6px;padding:7px 12px;font-size:11px;
+  color:var(--text-tertiary);border-bottom:1px solid var(--border);background:var(--bg-subtle)}
+.frame-label .dot{width:6px;height:6px;border-radius:50%}
+.dot.before{background:#a1a1aa}.dot.after{background:var(--accent)}
+iframe{flex:1;width:100%;border:0;background:#fff;min-height:0}
+.empty{display:grid;place-items:center;height:100%;color:var(--text-tertiary);font-size:13px;text-align:center;padding:24px}
+
+.library{margin:16px;padding:0 0 16px}
+.lib-head{display:flex;align-items:center;gap:8px;padding:14px 16px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md) var(--radius-md) 0 0}
+.lib-head h2{margin:0;font-size:13px;font-weight:500}
+.lib-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);
+  border:1px solid var(--border);border-top:0;border-radius:0 0 var(--radius-md) var(--radius-md);overflow:hidden}
+.lib-col{background:var(--surface);padding:12px 14px}
+.lib-col h3{margin:0 0 10px;font-size:12px;font-weight:500;color:var(--text)}
+.lib-item{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:12px;color:var(--text-secondary);
+  cursor:pointer;transition:color .15s ease-out}
+.lib-item:hover{color:var(--accent)}
+.lib-item .icon{width:13px;height:13px;color:var(--text-tertiary)}
+.code-modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;
+  background:rgba(24,24,27,.45);padding:32px}
+.code-modal.open{display:flex}
+.code-box{width:min(900px,100%);max-height:80vh;display:flex;flex-direction:column;
+  background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);overflow:hidden}
+.code-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);
+  font-size:13px;font-weight:500}
+.code-head .btn{margin-left:auto;min-height:30px;padding:5px 10px}
+.code-box pre{margin:0;padding:16px;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:12px;line-height:1.6;color:var(--text-secondary);background:var(--bg-subtle)}
+
+@media(max-width:980px){
+  .layout{grid-template-columns:1fr;height:auto}.panel{min-height:420px}
+  .frames{height:520px}.lib-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark"><svg class="icon" viewBox="0 0 24 24"><path d="m12 3 1.9 5.8L20 10.7l-6.1 1.9L12 18.4l-1.9-5.8L4 10.7l6.1-1.9z"/><path d="M19 17v4M17 19h4"/></svg></span>
+    Lioran-Seoul <span class="brand-sub">AI 美化师工作台</span>
+  </div>
+  <div class="topbar-right">
+    <span class="pill"><span class="dot"></span><span id="engineLabel">local-rules · A</span></span>
+    <a href="https://github.com/Jianheng71/Lioran-Seoul" target="_blank" rel="noopener">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-1-2.6c3.3-.4 6.8-1.6 6.8-7.4A5.8 5.8 0 0 0 20.3 4a5.4 5.4 0 0 0-.1-4s-1.3-.4-4.2 1.6a14 14 0 0 0-7.4 0C5.8-.4 4.5 0 4.5 0a5.4 5.4 0 0 0-.1 4A5.8 5.8 0 0 0 2.9 8c0 5.8 3.5 7 6.8 7.4a3.4 3.4 0 0 0-1 2.6V22"/></svg>
+      GitHub
+    </a>
+  </div>
+</header>
+
+<div class="layout">
+  <section class="panel">
+    <div class="panel-head">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+      输入与选项
+    </div>
+    <div class="panel-body">
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="loadDemo" style="flex:1">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          载入示例
+        </button>
+        <button class="btn btn-ghost" id="uploadBtn" style="flex:1">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          上传文件
+        </button>
+        <input type="file" id="fileInput" accept=".html,.htm,.tsx,.jsx,.vue,.css" hidden>
+      </div>
+
+      <div class="field">
+        <label class="section-label" for="code">待美化代码（index.html）</label>
+        <textarea id="code" spellcheck="false" placeholder="把别处 AI 生成的代码粘贴到这里…"></textarea>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label class="section-label" for="personality">页面性格</label>
+          <select id="personality">
+            <option value="landing">落地页 / 官网</option>
+            <option value="saas">SaaS / AI 产品</option>
+            <option value="dashboard">后台 / 仪表盘</option>
+            <option value="docs">文档 / 博客</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="section-label" for="level">改造层级</label>
+          <select id="level">
+            <option value="full">全部（推荐）</option>
+            <option value="L0">仅 L0 规范层</option>
+            <option value="L2">到 L2 动效层</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field" style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="dark" style="width:auto;min-height:auto">
+        <label for="dark" style="font-size:13px;color:var(--text-secondary);cursor:pointer">使用深色 token</label>
+      </div>
+
+      <button class="btn btn-primary" id="run">
+        <svg class="icon" viewBox="0 0 24 24"><path d="m12 3 1.9 5.8L20 10.7l-6.1 1.9L12 18.4l-1.9-5.8L4 10.7l6.1-1.9z"/></svg>
+        开始美化
+      </button>
+
+      <div class="status" id="status">就绪 · 载入示例或粘贴代码后点「开始美化」</div>
+
+      <div id="result" style="display:none">
+        <div class="result-block">
+          <h3><svg class="icon" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>诊断结果</h3>
+          <div id="diagnosis"></div>
+        </div>
+        <div class="result-block">
+          <h3><svg class="icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>改动清单</h3>
+          <div id="changes"></div>
+        </div>
+        <div class="result-block">
+          <div class="integrity" id="integrity"></div>
+        </div>
+        <div class="result-block">
+          <h3>备注</h3>
+          <div id="notes" style="font-size:12px;color:var(--text-tertiary)"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel preview-panel">
+    <div class="panel-head">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+      实时预览
+      <div class="preview-meta" style="margin-left:auto">
+        <div class="segmented" id="viewMode">
+          <button data-mode="split" class="active">并排对比</button>
+          <button data-mode="after">仅美化后</button>
+          <button data-mode="before">仅美化前</button>
+        </div>
+      </div>
+    </div>
+    <div class="frames" id="frames">
+      <div class="frame-wrap" id="wrapBefore">
+        <div class="frame-label"><span class="dot before"></span>美化前 · 原始代码</div>
+        <iframe id="frameBefore" title="美化前预览" sandbox="allow-scripts"></iframe>
+      </div>
+      <div class="frame-wrap" id="wrapAfter">
+        <div class="frame-label"><span class="dot after"></span>美化后 · Lioran-Seoul</div>
+        <iframe id="frameAfter" title="美化后预览" sandbox="allow-scripts"></iframe>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div style="padding:0 16px 16px">
+  <section class="library">
+    <div class="lib-head">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <h2>组件素材库</h2>
+      <span style="font-size:12px;color:var(--text-tertiary);margin-left:auto" id="libCount"></span>
+    </div>
+    <div class="lib-grid" id="libGrid"></div>
+  </section>
+</div>
+
+<div class="code-modal" id="codeModal">
+  <div class="code-box">
+    <div class="code-head">
+      <svg class="icon" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>
+      <span id="codeTitle">源码</span>
+      <button class="btn btn-ghost" id="closeModal">关闭</button>
+    </div>
+    <pre id="codeContent"></pre>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id)
+const setStatus = (msg, kind = "") => { const s = $("status"); s.textContent = msg; s.className = "status " + kind }
+
+let currentName = "index.html"
+let beforeHTML = ""
+let afterHTML = ""
+
+async function loadDemo() {
+  try {
+    const r = await fetch("/demo-before.html")
+    beforeHTML = await r.text()
+    $("code").value = beforeHTML
+    currentName = "demo-before.html"
+    $("frameBefore").srcdoc = beforeHTML
+    setStatus("已载入 Taskly 示例 · 点击「开始美化」查看效果", "ok")
+  } catch (e) { setStatus("示例载入失败：" + e.message, "err") }
+}
+
+async function run() {
+  const content = $("code").value.trim()
+  if (!content) return setStatus("请先粘贴代码或载入示例", "err")
+  $("run").disabled = true
+  setStatus("正在美化…", "")
+
+  const options = {
+    stack: "auto",
+    personality: $("personality").value,
+    dark: $("dark").checked,
+    level: $("level").value,
+  }
+  try {
+    const res = await fetch("/api/beautify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ projectName: "preview", options, files: [{ path: currentName, content }] }),
+    })
+    const data = await res.json()
+    if (!data.ok) throw new Error(data.message || data.error)
+
+    beforeHTML = content
+    afterHTML = data.files[0].content
+    $("frameBefore").srcdoc = beforeHTML
+    $("frameAfter").srcdoc = afterHTML
+    $("engineLabel").textContent = data.engine + " · " + (data.engine === "ai" ? "B" : "A")
+
+    const d = data.diagnosis || {}
+    $("diagnosis").innerHTML =
+      `<span class="tag">栈 ${d.stack || "auto"}</span><span class="tag">${d.personality || "landing"}</span>` +
+      (d.issues || []).map((i) => `<div class="change">${escapeHtml(i)}</div>`).join("")
+
+    $("changes").innerHTML = (data.changes || []).map((c) =>
+      `<div class="change"><b>${escapeHtml(c.layer)}</b> · ${escapeHtml(c.what)}` +
+      `<small>原因：${escapeHtml(c.why)} ｜ 依据：${escapeHtml(c.source || "—")}</small></div>`).join("")
+
+    const ok = data.functionIntegrity && data.functionIntegrity.confirmed
+    $("integrity").textContent = ok
+      ? "功能未动确认：函数 / 状态 / 路由 / 接口 / 数据 / 事件 / 文案均未改动"
+      : "警告：未能确认功能完整性"
+    $("integrity").style.background = ok ? "#f0fdf4" : "#fef2f2"
+
+    $("notes").innerHTML = (data.notes || []).map((n) => `<div style="margin-bottom:4px">· ${escapeHtml(n)}</div>`).join("")
+    $("result").style.display = "block"
+    setStatus(`完成 · ${data.changes.length} 项改动 · 引擎 ${data.engine}`, "ok")
+  } catch (e) {
+    setStatus("美化失败：" + e.message, "err")
+  } finally { $("run").disabled = false }
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]))
+}
+
+$("viewMode").addEventListener("click", (e) => {
+  const btn = e.target.closest("button"); if (!btn) return
+  document.querySelectorAll("#viewMode button").forEach((b) => b.classList.remove("active"))
+  btn.classList.add("active")
+  const mode = btn.dataset.mode
+  $("frames").classList.toggle("single", mode !== "split")
+  $("wrapBefore").style.display = mode === "after" ? "none" : "flex"
+  $("wrapAfter").style.display = mode === "before" ? "none" : "flex"
+})
+
+$("run").addEventListener("click", run)
+$("loadDemo").addEventListener("click", loadDemo)
+$("uploadBtn").addEventListener("click", () => $("fileInput").click())
+$("fileInput").addEventListener("change", (e) => {
+  const f = e.target.files[0]; if (!f) return
+  const reader = new FileReader()
+  reader.onload = () => {
+    $("code").value = reader.result
+    currentName = f.name
+    $("frameBefore").srcdoc = reader.result
+    setStatus(`已载入 ${f.name}`, "ok")
+  }
+  reader.readAsText(f)
+})
+
+async function loadLibrary() {
+  try {
+    const r = await fetch("/api/registry")
+    const data = await r.json()
+    const files = (data.files || []).filter((f) => !f.path.endsWith("registry.json"))
+    $("libCount").textContent = `${files.length} 个文件 · 点击查看源码`
+    const groups = {}
+    files.forEach((f) => { (groups[f.group] = groups[f.group] || []).push(f) })
+    $("libGrid").innerHTML = Object.keys(groups).sort().map((g) =>
+      `<div class="lib-col"><h3>${escapeHtml(g)}</h3>` +
+      groups[g].slice(0, 12).map((f) =>
+        `<div class="lib-item" data-path="${escapeHtml(f.path)}">
+           <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+           ${escapeHtml(f.path.split("/").pop())}</div>`).join("") +
+      (groups[g].length > 12 ? `<div style="font-size:11px;color:var(--text-tertiary);margin-top:6px">+${groups[g].length - 12} 个…</div>` : "") +
+      `</div>`).join("")
+
+    document.querySelectorAll(".lib-item").forEach((el) => el.addEventListener("click", async () => {
+      const p = el.dataset.path
+      $("codeTitle").textContent = p
+      $("codeContent").textContent = "载入中…"
+      $("codeModal").classList.add("open")
+      try { $("codeContent").textContent = await (await fetch("/registry/" + p)).text() }
+      catch (e) { $("codeContent").textContent = "读取失败：" + e.message }
+    }))
+  } catch (e) { $("libCount").textContent = "素材库读取失败" }
+}
+
+$("closeModal").addEventListener("click", () => $("codeModal").classList.remove("open"))
+$("codeModal").addEventListener("click", (e) => { if (e.target.id === "codeModal") $("codeModal").classList.remove("open") })
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("codeModal").classList.remove("open") })
+
+loadDemo()
+loadLibrary()
+</script>
+</body>
+</html>

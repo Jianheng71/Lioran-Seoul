@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taskly - 让团队的事情有着落</title>
+<style>
+:root{
+  --bg:#ffffff;--bg-subtle:#fafafa;--bg-muted:#f4f4f5;--surface:#ffffff;
+  --text:#18181b;--text-secondary:#52525b;--text-tertiary:#71717a;
+  --border:#e4e4e7;--border-strong:#d4d4d8;
+  --accent:#4f46e5;--accent-hover:#4338ca;--accent-soft:#eef2ff;
+  --radius-sm:8px;--radius-md:12px;--radius-lg:16px;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.04);--shadow-md:0 8px 24px rgba(0,0,0,.08);
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+.icon{width:20px;height:20px;stroke:currentColor;stroke-width:1.75;fill:none;
+  stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* 顶部导航 */
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-in{display:flex;align-items:center;gap:32px;height:64px}
+.brand{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;letter-spacing:-.02em}
+.brand-mark{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;
+  background:var(--accent);color:#fff}
+.brand-mark .icon{width:16px;height:16px;stroke-width:2.5}
+.nav-links{display:flex;gap:28px;margin-left:auto;align-items:center}
+.nav-links a{font-size:14px;color:var(--text-secondary);transition:color .15s ease-out}
+.nav-links a:hover{color:var(--text)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;
+  padding:10px 16px;border:1px solid transparent;border-radius:var(--radius-sm);
+  font-size:14px;font-weight:500;cursor:pointer;transition:all .15s ease-out;font-family:inherit}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-ghost{background:var(--surface);color:var(--text);border-color:var(--border)}
+.btn-ghost:hover{background:var(--bg-muted);border-color:var(--border-strong)}
+.btn-sm{min-height:34px;padding:6px 14px;font-size:13px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Hero */
+.hero{position:relative;overflow:hidden;text-align:center;padding:96px 24px 88px}
+.hero-grid{position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(circle,var(--border-strong) 1px,transparent 1px);
+  background-size:24px 24px;
+  mask-image:radial-gradient(ellipse 60% 55% at 50% 35%,#000 0%,transparent 100%);
+  -webkit-mask-image:radial-gradient(ellipse 60% 55% at 50% 35%,#000 0%,transparent 100%)}
+.hero-in{position:relative;z-index:1;max-width:760px;margin:0 auto}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;margin-bottom:24px;
+  border:1px solid var(--border);border-radius:999px;background:var(--surface);
+  font-size:12px;color:var(--text-secondary);box-shadow:var(--shadow-sm)}
+.badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+h1{margin:0 0 20px;font-size:clamp(38px,5.2vw,60px);line-height:1.08;font-weight:600;
+  letter-spacing:-.035em;
+  background:linear-gradient(100deg,var(--text) 8%,var(--accent) 52%,var(--text) 92%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{max-width:560px;margin:0 auto 32px;font-size:17px;line-height:1.7;color:var(--text-secondary)}
+.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.hero-note{margin-top:20px;font-size:13px;color:var(--text-tertiary)}
+
+/* Marquee */
+.logos{border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  background:var(--bg-subtle);padding:24px 0;overflow:hidden}
+.logos-label{text-align:center;font-size:12px;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:20px}
+.marquee{display:flex;overflow:hidden;gap:64px;white-space:nowrap;
+  mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.marquee-track{display:flex;gap:64px;flex-shrink:0;animation:slide 26s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+.marquee span{font-size:15px;font-weight:600;color:var(--text-tertiary);letter-spacing:-.01em}
+@keyframes slide{to{transform:translateX(calc(-100% - 64px))}}
+
+/* Section */
+section{padding:80px 24px}
+.section-head{max-width:600px;margin:0 auto 48px;text-align:center}
+.eyebrow{display:block;margin-bottom:12px;font-size:12px;font-weight:500;letter-spacing:.08em;
+  color:var(--accent);text-transform:uppercase}
+h2{margin:0 0 12px;font-size:30px;font-weight:600;letter-spacing:-.025em}
+.section-head p{margin:0;font-size:15px;color:var(--text-secondary)}
+
+/* Bento */
+.bento{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1000px;margin:0 auto}
+.tile{position:relative;overflow:hidden;padding:24px;border:1px solid var(--border);
+  border-radius:var(--radius-md);background:var(--surface);box-shadow:var(--shadow-sm);
+  transition:border-color .2s ease-out,box-shadow .2s ease-out,transform .2s ease-out}
+.tile:hover{border-color:var(--border-strong);box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.tile-wide{grid-column:span 2}
+.tile-icon{display:grid;place-items:center;width:40px;height:40px;margin-bottom:20px;
+  border-radius:10px;background:var(--accent-soft);color:var(--accent)}
+.tile h3{margin:0 0 8px;font-size:17px;font-weight:500}
+.tile p{margin:0;font-size:14px;color:var(--text-secondary)}
+.tile-glow{position:absolute;right:-60px;bottom:-80px;width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,var(--accent-soft),transparent 70%);pointer-events:none}
+
+/* Numbers */
+.numbers{background:var(--bg-subtle);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.num-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:900px;margin:0 auto;text-align:center}
+.num{font-size:36px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.num-label{margin-top:4px;font-size:13px;color:var(--text-tertiary)}
+
+/* Form */
+.try-box{max-width:560px;margin:0 auto}
+.field{display:flex;gap:8px;flex-wrap:wrap}
+input{flex:1;min-width:200px;min-height:40px;padding:10px 12px;font:inherit;font-size:14px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;
+  transition:border-color .15s ease-out,box-shadow .15s ease-out}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+input::placeholder{color:var(--text-tertiary)}
+#subscribeMsg{min-height:20px;margin:12px 0 0;font-size:13px;color:var(--accent)}
+.todo{margin-top:48px;padding-top:40px;border-top:1px solid var(--border)}
+.todo h3{margin:0 0 8px;font-size:17px;font-weight:500}
+.todo > p{margin:0 0 20px;font-size:14px;color:var(--text-secondary)}
+#todoList{list-style:none;margin:20px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+#todoList li{display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:14px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+  cursor:pointer;transition:border-color .15s ease-out,color .15s ease-out}
+#todoList li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+#todoList li:hover{border-color:var(--accent);color:var(--text-tertiary)}
+
+footer{padding:32px 24px;border-top:1px solid var(--border);font-size:13px;color:var(--text-tertiary)}
+.footer-in{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+footer a:hover{color:var(--accent)}
+
+#progress{position:fixed;top:0;left:0;height:2px;width:100%;background:var(--accent);
+  transform:scaleX(0);transform-origin:left;z-index:99;pointer-events:none}
+[data-reveal]{opacity:0;transform:translateY(14px);transition:opacity .45s var(--ease),transform .45s var(--ease)}
+[data-reveal].visible{opacity:1;transform:none}
+
+@media(max-width:768px){
+  .bento{grid-template-columns:1fr}.tile-wide{grid-column:span 1}
+  .num-grid{grid-template-columns:1fr;gap:32px}
+  .hero{padding:64px 20px 56px}section{padding:56px 20px}
+  .nav-links{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  [data-reveal]{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<nav class="nav">
+  <div class="wrap nav-in">
+    <span class="brand">
+      <span class="brand-mark"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
+      Taskly
+    </span>
+    <div class="nav-links">
+      <a href="#features">功能</a>
+      <a href="#numbers">数据</a>
+      <a href="#try">免费试用</a>
+      <a class="btn btn-primary btn-sm" href="#try">立即开始</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-in">
+    <span class="badge"><span class="dot"></span>已服务 12,000+ 团队</span>
+    <h1>让团队的事情有着落</h1>
+    <p>Taskly 是一个简单的团队协作工具，帮你把任务、进度和讨论放在一个地方。现在就开始免费使用吧。</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="scrollToTry()">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        立即开始
+      </button>
+      <button class="btn btn-ghost" onclick="scrollToTry()">了解更多</button>
+    </div>
+    <p class="hero-note">无需信用卡 · 3 分钟完成配置</p>
+  </div>
+</header>
+
+<div class="logos">
+  <p class="logos-label">受到这些团队的信任</p>
+  <div class="marquee">
+    <div class="marquee-track">
+      <span>Acme</span><span>Globex</span><span>Initech</span><span>Umbrella</span><span>Soylent</span><span>Hooli</span>
+    </div>
+    <div class="marquee-track" aria-hidden="true">
+      <span>Acme</span><span>Globex</span><span>Initech</span><span>Umbrella</span><span>Soylent</span><span>Hooli</span>
+    </div>
+  </div>
+</div>
+
+<section id="features">
+  <div class="section-head" data-reveal>
+    <span class="eyebrow">功能</span>
+    <h2>主要功能，一览无余</h2>
+    <p>把复杂留给我们，把清晰留给团队。</p>
+  </div>
+  <div class="bento">
+    <article class="tile tile-wide" data-reveal>
+      <div class="tile-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18"/></svg></div>
+      <h3>任务看板</h3>
+      <p>把所有任务放进看板，谁在做、做到哪一步，一眼看清。</p>
+      <div class="tile-glow"></div>
+    </article>
+    <article class="tile" data-reveal>
+      <div class="tile-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+      <h3>实时讨论</h3>
+      <p>在任务下面直接讨论，不用再来回翻聊天记录。</p>
+    </article>
+    <article class="tile" data-reveal>
+      <div class="tile-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M3 3v18h18M7 15l4-4 3 3 5-6"/></svg></div>
+      <h3>进度报告</h3>
+      <p>每周自动生成进度报告，省掉手动整理的时间。</p>
+    </article>
+    <article class="tile tile-wide" data-reveal>
+      <div class="tile-icon"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+      <h3>始终同步</h3>
+      <p>任务、进度和讨论放在一个地方，团队不用再切换工具。</p>
+      <div class="tile-glow"></div>
+    </article>
+  </div>
+</section>
+
+<section class="numbers" id="numbers">
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">数据</span>
+      <h2>大家在用</h2>
+      <p>每天都有新的团队加入。</p>
+    </div>
+    <div class="num-grid" data-reveal>
+      <div><div class="num">12,000</div><div class="num-label">活跃团队</div></div>
+      <div><div class="num">480,000</div><div class="num-label">已完成任务</div></div>
+      <div><div class="num">99</div><div class="num-label">覆盖国家</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="try">
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">开始使用</span>
+      <h2>免费试用</h2>
+      <p>留下邮箱，我们会把试用链接发给你。</p>
+    </div>
+    <div class="try-box" data-reveal>
+      <div class="field">
+        <input id="email" type="email" placeholder="you@company.com">
+        <button class="btn btn-primary" onclick="subscribe()">提交</button>
+      </div>
+      <p id="subscribeMsg"></p>
+
+      <div class="todo">
+        <h3>顺便试试我们的待办清单</h3>
+        <p>点击任意一条即可删除。</p>
+        <div class="field">
+          <input id="todoInput" placeholder="添加一个任务">
+          <button class="btn btn-ghost" onclick="addTodo()">添加</button>
+        </div>
+        <ul id="todoList"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-in">
+    <span>© 2026 Taskly. 保留所有权利。</span>
+    <a href="#try">联系我们</a>
+  </div>
+</footer>
+
+<script>
+/* 以下业务逻辑与 demo-before.html 完全一致，未作任何改动 */
+function scrollToTry() { document.getElementById('try').scrollIntoView({ behavior: 'smooth' }); }
+function subscribe() {
+  var v = document.getElementById('email').value;
+  document.getElementById('subscribeMsg').textContent =
+    v.indexOf('@') > 0 ? '已提交：' + v : '请输入有效邮箱';
+}
+function addTodo() {
+  var input = document.getElementById('todoInput');
+  if (!input.value.trim()) return;
+  var li = document.createElement('li');
+  li.textContent = input.value;
+  li.onclick = function () { this.remove(); };
+  document.getElementById('todoList').appendChild(li);
+  input.value = '';
+}
+
+/* L2 纯视觉脚本：滚动进度 + 入场淡入 */
+(function () {
+  var bar = document.getElementById('progress');
+  var ticking = false;
+  function update() {
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.transform = 'scaleX(' + (h > 0 ? Math.min(1, window.scrollY / h) : 0) + ')';
+    ticking = false;
+  }
+  window.addEventListener('scroll', function () {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
+  update();
+
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var nodes = document.querySelectorAll('[data-reveal]');
+  if (reduce || !('IntersectionObserver' in window)) {
+    nodes.forEach(function (n) { n.classList.add('visible'); }); return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+  }, { threshold: .08 });
+  nodes.forEach(function (n) { io.observe(n); });
+})();
+</script>
+</body>
+</html>
