@@ -69,7 +69,7 @@ case ",$SCOPES_KEY," in
   或新建（scope 已预选）：https://github.com/settings/tokens/new?scopes=repo,workflow"
     ;;
 esac
-say "✓ token 有效：$LOGIN（scopes: $SCOPES）"
+say "✓ token 有效：${LOGIN}（scopes: ${SCOPES}）"
 
 # ---------- 2. 存入 git 凭据 ----------
 printf 'protocol=https\nhost=github.com\nusername=%s\npassword=%s\n\n' "$LOGIN" "$TOKEN" \
@@ -149,7 +149,7 @@ for _ in $(seq 1 60); do
       ;;
     "completed "*)
       say ""
-      fail "❌ CI 失败（$STATUS）：https://github.com/$REPO_SLUG/actions/runs/$RUN_ID"
+      fail "❌ CI 失败（${STATUS}）：https://github.com/$REPO_SLUG/actions/runs/$RUN_ID"
       ;;
   esac
 done
