@@ -39,7 +39,7 @@
 | `options.stack` | `auto \| react \| vue \| svelte \| html \| other` | 栈识别结果，`auto` 由服务端推断 |
 | `options.personality` | `auto \| landing \| saas \| dashboard \| docs` | 页面性格，决定 L3 特效选型 |
 | `options.dark` | boolean | 是否用深色 token |
-| `options.level` | `L0 \| L1 \| L2 \| L3 \| full` | 改造到哪一层；`full` = 全部 |
+| `options.level` | `L0 \| L1 \| L2 \| L3 \| full` | 改造到哪一层；`full` = 全部。本地引擎实际支持：`L0` 只注入规范层，`L2` / `L3` / `full` 额外追加动效脚本；`L1` 与 `L3` 的组件替换仍需 AI 引擎 |
 | `files` | array | **必填**，`{ path, content }`，路径保持原样 |
 
 ### 响应
@@ -67,7 +67,12 @@
   ],
   "functionIntegrity": {
     "confirmed": true,
-    "untouched": ["functions", "state", "routes", "apis", "data", "events", "copy"]
+    "untouched": ["functions", "state", "routes", "apis", "data", "events", "copy"],
+    "checks": [
+      "注入层可无损剥离：标签、属性、事件绑定与原文件逐字节一致",
+      "用户可见文案未变"
+    ],
+    "failures": []
   },
   "notes": ["非 React 栈，L1/L3 已降级为等效 CSS 实现"]
 }
@@ -80,6 +85,9 @@
 | `files` | **与请求同路径、同数量**，只换 `content`；`changed=false` 表示无需改动 |
 | `changes` | 逐文件改动清单，格式对应 `LIORAN.md` 第七节 |
 | `functionIntegrity` | 「功能未动」确认，前端据此给出安全提示 |
+| `functionIntegrity.confirmed` | **实测结果，不是常量**：把注入的 `<style id="lioran-tokens">` 与 `<script id="lioran-motion">` 剥掉后必须逐字节还原原文，且可见文案必须一致 |
+| `functionIntegrity.checks` | 本次实际通过的校验项 |
+| `functionIntegrity.failures` | 校验失败项（`{ path, reason }`）；`confirmed=false` 时非空 |
 
 ### 错误
 
@@ -89,9 +97,9 @@
 
 | error | 触发 |
 |---|---|
-| `INVALID_INPUT` | 缺 `files` 或格式错误 |
+| `INVALID_INPUT` | 缺 `files` 或格式错误、路径非法、畸形 URL |
 | `PAYLOAD_TOO_LARGE` | 请求体 > 2MB |
-| `UNSUPPORTED_ENCODING` | 非 UTF-8 内容 |
+| `UNSUPPORTED_ENCODING` | 文件内容不是合法 UTF-8（解码出现 U+FFFD） |
 | `ENGINE_ERROR` | 引擎内部失败 |
 
 ---

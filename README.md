@@ -37,6 +37,9 @@
 cd Lioran-Seoul
 node api/server.js
 # 打开 http://localhost:4173
+
+node test/smoke.js
+# 零依赖自检：接口、路径安全、level 选项、完整性校验、demo 文案一致性
 ```
 
 零依赖，不需要 `npm install`。工作台支持：
@@ -69,13 +72,15 @@ Lioran-Seoul/
     ├── index.html         美化工作台
     ├── demo-before.html   美化前样例（保留完整功能）
     └── demo-after.html    美化后样例（同功能，纯视觉升级）
+
+test/smoke.js              零依赖自检：接口 / 路径安全 / level / 完整性 / demo 文案
 ```
 
 ---
 
 ## 路线：A → B
 
-- **A（当前已跑通）**：`LIORAN.md` 工作手册 + `design/` 规范 + `registry/` 素材库 + 一组真实前后对比样例。把代码文件发给我，我按手册开跑。
+- **A（当前已跑通）**：`LIORAN.md` 工作手册 + `design/` 规范 + `registry/` 素材库 + 一组真实前后对比样例。本地规则引擎支持 `level=L0`（只注规范层）与 `level=L2/L3/full`（追加动效），返回的「功能未动」是**实测结论**——注入层剥离后必须逐字节还原原文件。`node test/smoke.js` 可回归。
 - **B（骨架已就绪）**：`api/contract.md` 定义了 `/api/beautify` 的完整契约，`api/server.js` 里 `beautify()` 是唯一需要换成大模型调用的函数。接上 AI 后，`preview/index.html` 无需改动即可从本地规则引擎切到真实 AI。
 
 契约要点：入参是文件数组，出参是同路径文件数组 + 改动清单 + 「功能未动」确认项。详见 `api/contract.md`。

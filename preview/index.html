@@ -304,6 +304,7 @@ async function run() {
     })
     const data = await res.json()
     if (!data.ok) throw new Error(data.message || data.error)
+    if (!Array.isArray(data.files) || !data.files.length) throw new Error("接口未返回文件")
 
     beforeHTML = content
     afterHTML = data.files[0].content
@@ -313,22 +314,27 @@ async function run() {
 
     const d = data.diagnosis || {}
     $("diagnosis").innerHTML =
-      `<span class="tag">栈 ${d.stack || "auto"}</span><span class="tag">${d.personality || "landing"}</span>` +
+      `<span class="tag">栈 ${escapeHtml(d.stack || "auto")}</span><span class="tag">${escapeHtml(d.personality || "landing")}</span>` +
       (d.issues || []).map((i) => `<div class="change">${escapeHtml(i)}</div>`).join("")
 
-    $("changes").innerHTML = (data.changes || []).map((c) =>
+    const changes = data.changes || []
+    $("changes").innerHTML = changes.map((c) =>
       `<div class="change"><b>${escapeHtml(c.layer)}</b> · ${escapeHtml(c.what)}` +
       `<small>原因：${escapeHtml(c.why)} ｜ 依据：${escapeHtml(c.source || "—")}</small></div>`).join("")
 
-    const ok = data.functionIntegrity && data.functionIntegrity.confirmed
-    $("integrity").textContent = ok
+    const fi = data.functionIntegrity || {}
+    const ok = fi.confirmed === true
+    const el = $("integrity")
+    el.textContent = ok
       ? "功能未动确认：函数 / 状态 / 路由 / 接口 / 数据 / 事件 / 文案均未改动"
-      : "警告：未能确认功能完整性"
-    $("integrity").style.background = ok ? "#f0fdf4" : "#fef2f2"
+      : "警告：未能确认功能完整性" + ((fi.failures || []).length ? " — " + fi.failures.map((f) => f.path + "：" + f.reason).join("；") : "")
+    el.style.background = ok ? "#f0fdf4" : "#fef2f2"
+    el.style.borderColor = ok ? "#bbf7d0" : "#fecaca"
+    el.style.color = ok ? "#166534" : "#991b1b"
 
     $("notes").innerHTML = (data.notes || []).map((n) => `<div style="margin-bottom:4px">· ${escapeHtml(n)}</div>`).join("")
     $("result").style.display = "block"
-    setStatus(`完成 · ${data.changes.length} 项改动 · 引擎 ${data.engine}`, "ok")
+    setStatus(`完成 · ${changes.length} 项改动 · 引擎 ${data.engine}`, "ok")
   } catch (e) {
     setStatus("美化失败：" + e.message, "err")
   } finally { $("run").disabled = false }

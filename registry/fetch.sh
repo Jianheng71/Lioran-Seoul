@@ -18,39 +18,52 @@ usage() {
   exit 1
 }
 
-[ $# -ge 2 ] || usage
-ACTION="$1"; REPO="$2"; shift 2
+list_cached() {
+  local repo="$1" dir="$ROOT/$1"
+  if [ ! -d "$dir" ]; then
+    echo "$repo 目录不存在"
+    return 0
+  fi
+  echo "$repo 已缓存文件："
+  ls -1 "$dir" | sed 's/\.tsx$//' | sed 's/^/  /'
+}
 
-case "$REPO" in
-  shadcn-ui) BASE="$SHADCN" ;;
-  magic-ui)  BASE="$MAGIC" ;;
-  *) echo "未知仓库: $REPO"; usage ;;
-esac
+[ $# -ge 1 ] || usage
 
-if [ "$ACTION" = "list" ]; then
-  if [ "$REPO" = "magic-ui" ] && [ -f "$ROOT/magic-ui/registry.json" ]; then
-    python3 - "$ROOT/magic-ui/registry.json" <<'PY'
+# ---- list 子命令 ----
+if [ "$1" = "list" ]; then
+  REPO="${2:-}"
+  case "$REPO" in
+    magic-ui)
+      if [ -f "$ROOT/magic-ui/registry.json" ]; then
+        python3 - "$ROOT/magic-ui/registry.json" <<'PYEOF'
 import json, sys
 j = json.load(open(sys.argv[1]))
 names = [i.get("name") for i in j.get("items", []) if i.get("name")]
 print(f"Magic UI 共 {len(names)} 个条目：")
 print("  " + "  ".join(sorted(set(names))))
-PY
-  else
-    echo "$REPO 已缓存文件："
-    ls -1 "$ROOT/$REPO" | sed 's/\.tsx$//' | sed 's/^/  /'
-  fi
+PYEOF
+      else
+        list_cached magic-ui
+      fi
+      ;;
+    shadcn-ui) list_cached shadcn-ui ;;
+    *) echo "未知仓库: ${REPO:-<空>}"; usage ;;
+  esac
   exit 0
 fi
 
-[ "$ACTION" = "get" ] || [ "$ACTION" = "shadcn-ui" ] || [ "$ACTION" = "magic-ui" ] || true
-
-# 支持 `fetch.sh shadcn-ui button card` 这种省略 get 的写法
-if [ "$ACTION" != "get" ]; then
-  NAMES=("$ACTION" "$@")
-else
-  NAMES=("$@")
-fi
+# ---- 拉取组件：兼容 `fetch.sh <repo> <name>` 与 `fetch.sh get <repo> <name>` ----
+if [ "$1" = "get" ]; then shift; fi
+REPO="${1-}"
+shift || true
+case "$REPO" in
+  shadcn-ui) BASE="$SHADCN" ;;
+  magic-ui)  BASE="$MAGIC" ;;
+  *) echo "未知仓库: ${REPO:-<空>}"; usage ;;
+esac
+[ $# -ge 1 ] || usage
+NAMES=("$@")
 
 for name in "${NAMES[@]}"; do
   name="${name%.tsx}"
