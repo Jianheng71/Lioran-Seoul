@@ -72,9 +72,13 @@ esac
 say "✓ token 有效：${LOGIN}（scopes: ${SCOPES}）"
 
 # ---------- 2. 存入 git 凭据 ----------
-printf 'protocol=https\nhost=github.com\nusername=%s\npassword=%s\n\n' "$LOGIN" "$TOKEN" \
-  | git credential approve
-say "✓ 凭据已更新"
+# 沙箱或受限环境下 keychain 可能不可写，失败不致命：推送时会直接带上本次的 token
+if printf 'protocol=https\nhost=github.com\nusername=%s\npassword=%s\n\n' "$LOGIN" "$TOKEN" \
+   | git credential approve 2>/dev/null; then
+  say "✓ 凭据已更新"
+else
+  say "· 系统凭据写入失败（受限环境），本次推送改为直接携带 token"
+fi
 
 # ---------- 3. 把工作流放到它的最终位置 ----------
 if [ -f "$TEMPLATE" ]; then
@@ -113,10 +117,18 @@ else
   say "✓ 已提交"
 fi
 
-if ! git push -q origin HEAD 2>&1; then
-  fail "推送失败。确认 token 有 repo + workflow 权限。"
+# 用内联 credential helper 推送，绕过可能过期的系统凭据
+export GH_USER="$LOGIN" GH_PASS="$TOKEN"
+git -c credential.helper= \
+    -c 'credential.helper=!f() { test "$1" = get && { echo "username=${GH_USER}"; echo "password=${GH_PASS}"; }; }; f' \
+    push origin HEAD 2>&1 | tail -3 || true
+
+git fetch -q origin 2>/dev/null || true
+if [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main 2>/dev/null || echo none)" ]; then
+  say "✓ 已推送"
+else
+  fail "推送失败。确认 token 有 repo + workflow 权限，且当前分支为 main。"
 fi
-say "✓ 已推送"
 
 # ---------- 6. 等结果 ----------
 say ""
