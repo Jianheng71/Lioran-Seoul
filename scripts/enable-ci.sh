@@ -56,10 +56,12 @@ fi
 [ -n "$TOKEN" ] || fail "没有拿到 token，退出。"
 
 SCOPES="$(scopes_of "$TOKEN")"
+# GitHub 返回形如 "repo, workflow"（逗号后带空格），比较前去掉空白
+SCOPES_KEY="$(printf '%s' "$SCOPES" | tr -d '[:space:]')"
 LOGIN="$(login_of "$TOKEN")"
 [ -n "$LOGIN" ] || fail "token 无效或已过期。"
 
-case ",$SCOPES," in
+case ",$SCOPES_KEY," in
   *,workflow,*) ;;
   *)
     fail "这个 token 权限是 [$SCOPES]，缺少 workflow。
