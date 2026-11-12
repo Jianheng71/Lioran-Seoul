@@ -59,6 +59,25 @@ npm test
 
 ---
 
+## 自动化
+
+三道自动关卡，装好即用：
+
+| 关卡 | 触发时机 | 作用 |
+|---|---|---|
+| `npm test` | 手动 | 45 项零依赖自检 |
+| pre-push hook | 每次 `git push` | 自检不过就中止推送 |
+| GitHub Actions | push / PR | Node 18 / 20 / 22 三档跑同一份自检 |
+
+```bash
+npm run hooks       # 安装 pre-push 自检（约 1 秒，可 SKIP_TESTS=1 跳过）
+npm run ci:enable   # 激活 GitHub Actions
+```
+
+> `ci:enable` 需要 token 具备 `workflow` 权限——这是 GitHub 的硬性限制，任何工具都绕不过。脚本会先校验权限，缺了就给出**scope 已预选**的授权链接；拿到 token 后自动完成：存凭据 → 放置工作流 → 补 CI 徽章 → 提交推送 → 轮询运行结果。
+
+---
+
 ## 目录
 
 ```
@@ -78,6 +97,9 @@ Lioran-Seoul/
 │   ├── contract.md        POST /api/beautify 请求/响应契约
 │   └── server.js          零依赖服务：静态托管 + 接口 + 本地规则引擎
 ├── test/smoke.js          零依赖自检（45 项断言）
+├── ci/github-actions.yml  CI 工作流模板（npm run ci:enable 后移到 .github/workflows/）
+├── scripts/enable-ci.sh   一键激活 CI
+├── .githooks/pre-push     推送前自检
 └── preview/
     ├── index.html         美化工作台
     ├── demo-before.html   美化前样例（保留完整功能）

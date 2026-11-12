@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Lioran-Seoul · 推送前自检
+#
+# 安装：git config core.hooksPath .githooks
+# 跳过：SKIP_TESTS=1 git push
+#
+# 只跑本地零依赖自检（约 1 秒），不联网。
+set -euo pipefail
+
+if [ "${SKIP_TESTS:-0}" = "1" ]; then
+  echo "· 已跳过自检（SKIP_TESTS=1）"
+  exit 0
+fi
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "✗ 找不到 node，无法自检。装 Node 18+ 后重试，或用 SKIP_TESTS=1 跳过。" >&2
+  exit 1
+fi
+
+echo "· 推送前自检：node test/smoke.js"
+if ! node test/smoke.js >/tmp/lioran-prepush.log 2>&1; then
+  echo "✗ 自检未通过，推送已中止。详情：" >&2
+  tail -20 /tmp/lioran-prepush.log >&2
+  echo "" >&2
+  echo "  修复后重试；确需跳过：SKIP_TESTS=1 git push" >&2
+  exit 1
+fi
+echo "✓ 自检通过"

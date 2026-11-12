@@ -13,6 +13,12 @@ node test/smoke.js     # 45 项零依赖自检
 
 零依赖，不需要 `npm install`。也可以用 `npm start` / `npm test`。
 
+建议装一下推送前自检，避免把红的提交推上去：
+
+```bash
+npm run hooks
+```
+
 ## 提交前必须通过
 
 ```bash

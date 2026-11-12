@@ -9,7 +9,9 @@
   },
   "scripts": {
     "start": "node api/server.js",
-    "test": "node test/smoke.js"
+    "test": "node test/smoke.js",
+    "ci:enable": "bash scripts/enable-ci.sh",
+    "hooks": "git config core.hooksPath .githooks"
   },
   "keywords": [
     "ai",

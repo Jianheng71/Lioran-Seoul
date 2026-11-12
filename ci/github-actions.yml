@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["18", "20", "22"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      # 零依赖，不需要安装步骤
+      - name: 语法检查
+        run: |
+          node --check api/server.js
+          node --check test/smoke.js
+
+      - name: 自检
+        run: node test/smoke.js
+
+  shellcheck:
+    name: Shell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 检查 fetch.sh 可执行位
+        run: |
+          test -x registry/fetch.sh || (echo "registry/fetch.sh 缺少可执行位" && exit 1)
+          bash -n registry/fetch.sh
