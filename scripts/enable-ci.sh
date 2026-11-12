@@ -62,7 +62,9 @@ LOGIN="$(login_of "$TOKEN")"
 case ",$SCOPES," in
   *,workflow,*) ;;
   *)
-    fail "这个 token 权限是 [$SCOPES]，缺少 workflow。请到 https://github.com/settings/tokens 给它补勾 workflow 后重跑。"
+    fail "这个 token 权限是 [$SCOPES]，缺少 workflow。
+  给现有 token 补勾：https://github.com/settings/tokens
+  或新建（scope 已预选）：https://github.com/settings/tokens/new?scopes=repo,workflow"
     ;;
 esac
 say "✓ token 有效：$LOGIN（scopes: $SCOPES）"
