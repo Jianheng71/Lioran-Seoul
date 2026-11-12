@@ -1,6 +1,12 @@
 # Lioran-Seoul
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-4f46e5.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-3c873a.svg)](package.json)
+[![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](package.json)
+
 **AI 美化师。** 别人用 v0 / Bolt / Cursor 之类把产品搭到能跑，把代码文件交给 Lioran-Seoul，它在**不改动任何核心功能**的前提下，把整个视觉质量拉到大厂水准。
+
+> *An "AI beautifier" for AI-generated frontends.* Hand it a working-but-ugly codebase from v0 / Bolt / Cursor; it rewrites the visual layer only — functions, state, routes, APIs, data, event logic and copy stay byte-for-byte intact.
 
 > Seoul 只是项目名，不代表任何风格倾向。默认审美是中性、克制、现代的大厂感。
 
@@ -34,12 +40,15 @@
 ## 快速开始
 
 ```bash
+git clone https://github.com/Jianheng71/Lioran-Seoul.git
 cd Lioran-Seoul
-node api/server.js
-# 打开 http://localhost:4173
 
-node test/smoke.js
-# 零依赖自检：接口、路径安全、level 选项、完整性校验、demo 文案一致性
+node api/server.js    # 打开 http://127.0.0.1:4173
+node test/smoke.js    # 零依赖自检：接口、路径安全、level、完整性、demo 文案
+
+# 或者
+npm start
+npm test
 ```
 
 零依赖，不需要 `npm install`。工作台支持：
@@ -68,12 +77,17 @@ Lioran-Seoul/
 ├── api/
 │   ├── contract.md        POST /api/beautify 请求/响应契约
 │   └── server.js          零依赖服务：静态托管 + 接口 + 本地规则引擎
+├── test/smoke.js          零依赖自检（45 项断言）
 └── preview/
     ├── index.html         美化工作台
     ├── demo-before.html   美化前样例（保留完整功能）
     └── demo-after.html    美化后样例（同功能，纯视觉升级）
 
-test/smoke.js              零依赖自检：接口 / 路径安全 / level / 完整性 / demo 文案
+CONTRIBUTING.md            贡献指南（铁律、registry 许可、自检要求）
+SECURITY.md                安全策略与信任假设
+CODE_OF_CONDUCT.md         贡献者行为准则
+CHANGELOG.md               更新日志
+LICENSE                    MIT
 ```
 
 ---
@@ -87,6 +101,30 @@ test/smoke.js              零依赖自检：接口 / 路径安全 / level / 完
 
 ---
 
-## 上游许可
+## 许可
 
-`registry/` 下的组件源码来自各自上游仓库，版权与许可归原作者所有（shadcn/ui、Magic UI 均为 MIT，Motion 为 MIT，Lenis 为 MIT）。本项目仅作内部素材索引与视觉规范沉淀，不宣称原创。使用到具体组件时请遵循对应上游许可。
+本项目以 [MIT License](LICENSE) 发布，可自由使用、修改、分发与商用，保留版权与许可声明即可。
+
+`registry/` 下的组件源码来自各自上游仓库，版权与许可归原作者所有：
+
+| 目录 | 上游 | 许可 |
+|---|---|---|
+| `registry/shadcn-ui/` | [shadcn-ui/ui](https://github.com/shadcn-ui/ui) | MIT |
+| `registry/magic-ui/` | [magicuidesign/magicui](https://github.com/magicuidesign/magicui) | MIT |
+| `registry/motion/` | [motiondivision/motion](https://github.com/motiondivision/motion) · [darkroomengineering/lenis](https://github.com/darkroomengineering/lenis) | MIT |
+
+本项目仅作素材索引与视觉规范沉淀，不宣称原创。使用具体组件时请遵循对应上游许可。
+
+---
+
+## 参与贡献
+
+欢迎 issue 与 PR。开始之前请读 [`CONTRIBUTING.md`](CONTRIBUTING.md) —— 这个项目对「不改功能、不改文案」的要求是硬的，`node test/smoke.js` 会拦下越界改动。
+
+- 发现安全问题：走 [`SECURITY.md`](SECURITY.md)，**不要开公开 issue**
+- 想讨论审美取舍或用法：开 Discussion
+- 组件素材：用 `./registry/fetch.sh` 从上游拉，不要手写
+
+## 致谢
+
+字体与图标规范参考 Tailwind CSS、Lucide Icons；`registry/` 的组件实现归 shadcn/ui、Magic UI、Motion、Lenis 的作者所有。

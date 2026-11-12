@@ -1,0 +1,48 @@
+name: 功能建议
+description: 提出新能力或改进
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提之前请看一眼 `README.md` 的「路线：A → B」和 `CHANGELOG.md`，避免重复。
+        本项目对「加功能」比较克制：能靠规范或 prompt 解决的，不写代码。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你想解决什么问题
+      description: 先讲问题，不要直接讲方案
+    validations:
+      required: true
+
+  - type: dropdown
+    id: layer
+    attributes:
+      label: 属于哪一层
+      options:
+        - L0 通用视觉层（任何栈）
+        - L1 基础组件层（shadcn/ui）
+        - L2 动效底座（Motion / Lenis）
+        - L3 特效注入（Magic UI / Aceternity）
+        - B 阶段 AI 引擎
+        - 工程与工具链
+        - 文档
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 你的方案
+      description: 可选。如果涉及接口变更，请说明如何兼容 `api/contract.md`
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: iron-rules
+    attributes:
+      label: 与铁律的关系
+      options:
+        - label: 该建议不会要求改动用户代码的功能、状态、路由或文案
+          required: true

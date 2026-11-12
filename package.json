@@ -1,0 +1,32 @@
+{
+  "name": "lioran-seoul",
+  "version": "0.1.1",
+  "description": "AI 美化师：接手别处 AI 搭好的前端代码，在不改功能与文案的前提下把视觉重写到大厂水准",
+  "license": "MIT",
+  "private": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node api/server.js",
+    "test": "node test/smoke.js"
+  },
+  "keywords": [
+    "ai",
+    "beautifier",
+    "design-system",
+    "shadcn-ui",
+    "magic-ui",
+    "motion",
+    "tailwindcss",
+    "llm"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jianheng71/Lioran-Seoul.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Jianheng71/Lioran-Seoul/issues"
+  },
+  "homepage": "https://github.com/Jianheng71/Lioran-Seoul#readme"
+}
